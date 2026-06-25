@@ -4,3 +4,6 @@ This is a repository for Sam and Ethan to coordinate code for our Formula Carbon
 
 1. $CO_2$ Cartridge
 2. EV
+
+# Useful Resources
+* [Git Cheat Sheet](https://git-scm.com/cheat-sheet)
