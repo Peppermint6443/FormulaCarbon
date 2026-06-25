@@ -7,3 +7,4 @@ This is a repository for Sam and Ethan to coordinate code for our Formula Carbon
 
 # Useful Resources
 * [Git Cheat Sheet](https://git-scm.com/cheat-sheet)
+* [Git Install Link](https://git-scm.com/install/windows)
