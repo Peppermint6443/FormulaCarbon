@@ -2,11 +2,15 @@ import time
 from car import Car, EV, CO2
 
 def main():
-    car = CO2()
+    car = EV()
 
-    while True:
-        car.update()
-        time.sleep(0.05)  # 20 Hz polling rate
+    try:
+        while True:
+            car.update()
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        car.stop_motors()
+        print("Shutting down.")
 
 if __name__ == "__main__":
     main()
