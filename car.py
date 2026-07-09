@@ -2,6 +2,7 @@
 #         Car Class         #
 # ========================= #
 # imports
+from machine import Pin
 
 class States:
     IDLE = 'IDL'
@@ -55,6 +56,9 @@ class Car:
     
     def drive(self):
         print('Car is driving.')
+
+    def stop_motors(self):
+        print('Stopping motors.')
 
 
 class EV(Car):
