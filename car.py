@@ -2,7 +2,8 @@
 #         Car Class         #
 # ========================= #
 # imports
-from machine import Pin
+from machine import Pin, PWM, time_pulse_us
+import time
 
 class States:
     IDLE = 'IDL'
@@ -12,17 +13,20 @@ class States:
 
 
 class Car:
-    def __init__(self, arm_button_pin = 21, distance_sensor_pin = 22, motor_pin = 20):
+    def __init__(self, arm_button_pin = 21, echo_sensor_pin = 23, trig_sensor_pin = 22, motor_pins = [18, 19, 20]):
         self.car_state = States.IDLE
 
         # set up pin for arm button
         self.arm_button = Pin(arm_button_pin, Pin.IN, Pin.PULL_UP)
 
         # set up pin for distance sensor
-        self.distance_sensor = Pin(distance_sensor_pin, Pin.IN, Pin.PULL_UP)
+        self.echo = Pin(echo_sensor_pin, Pin.IN)
+        self.trig = Pin(trig_sensor_pin, Pin.OUT, value=0)
 
         # set up pin for motor control
-        self.motor = Pin(motor_pin, Pin.OUT)
+        self.motor_in1 = Pin(motor_pins[0], Pin.OUT, value = 0)
+        self.motor_in2 = Pin(motor_pins[1], Pin.OUT, value = 0)
+        self.motor_en = PWM(Pin(motor_pins[2]), freq=1000)
         return
 
     def update(self):
@@ -60,24 +64,46 @@ class Car:
         return False
 
     def is_sensor_triggered(self):
-        # return true when sensor is triggered
-        sensor_value = self.distance_sensor.value()
-        if sensor_value == 0:
-            print('Sensor triggered.')
+        # set the threshold distance for triggering sensor
+        THRESHOLD = 15
+
+        d = self.distance_cm()
+        print(d)
+        if d is not None and d > THRESHOLD:
             return True
-        return False
+        else:
+            return False
 
     def is_finished(self):
         # return true when car has finished its task
+        d = self.distance_cm()
+        Threshold = 5
+        if d is not None and d < Threshold:
+            return True
         # This is a placeholder - replace with actual logic
         return False
     
     def drive(self):
         print('Car is driving.')
-        self.motor.value(1)
+        self.motor_in1.value(1)
+        self.motor_in2.value(0)
+
+        # set the motor to full speed
+        self.motor_en.duty_u16(65535)
 
     def stop_motors(self):
-        self.motor.value(0)
+        self.motor_in1.value(0)
+        self.motor_in2.value(0)
+        self.motor_en.duty_u16(0)
+
+    def distance_cm(self):
+        self.trig.value(0); time.sleep_us(2)
+        self.trig.value(1); time.sleep_us(10)
+        self.trig.value(0)
+        dur = time_pulse_us(self.echo, 1, 30000)
+        if dur < 0:
+            return None
+        return (dur* 0.0343)/2
 
 
 class EV(Car):
@@ -85,7 +111,9 @@ class EV(Car):
         super().__init__()
 
     def drive(self):
-        self.motor.value(1)
+        self.motor_in1.value(1)
+        self.motor_in2.value(0)
+        self.motor_en.duty_u16(65535)
 
 class CO2(Car):
     def __init__(self):
