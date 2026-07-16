@@ -12,13 +12,23 @@ class States:
 
 
 class Car:
-    def __init__(self):
+    def __init__(self, arm_button_pin = 21, distance_sensor_pin = 22, motor_pin = 20):
         self.car_state = States.IDLE
+
+        # set up pin for arm button
+        self.arm_button = Pin(arm_button_pin, Pin.IN, Pin.PULL_UP)
+
+        # set up pin for distance sensor
+        self.distance_sensor = Pin(distance_sensor_pin, Pin.IN, Pin.PULL_UP)
+
+        # set up pin for motor control
+        self.motor = Pin(motor_pin, Pin.OUT)
         return
 
     def update(self):
         # idle
         if self.car_state == States.IDLE:
+            self.stop_motors()
             if self.is_button_pressed():
                 self.update_state(States.ARMED)
 
@@ -40,25 +50,34 @@ class Car:
         print(f'Car state updated from {temp} to {self.car_state}')
 
     def is_button_pressed(self):
-        # return true when user types b and pushes enter
-        user_input = input('Press b to press the button: ')
-        return user_input == 'b'
+        # check if button is pressed
+        button_value = self.arm_button.value()
+        
+        # check to see if voltage is low (button pressed)
+        if button_value == 0:
+            print('Button pressed.')
+            return True
+        return False
 
     def is_sensor_triggered(self):
         # return true when sensor is triggered
-        user_input = input('Press s to trigger the sensor: ')
-        return user_input == 's'
+        sensor_value = self.distance_sensor.value()
+        if sensor_value == 0:
+            print('Sensor triggered.')
+            return True
+        return False
 
     def is_finished(self):
         # return true when car has finished its task
-        user_input = input('Press f to indicate finished: ')
-        return user_input == 'f'
+        # This is a placeholder - replace with actual logic
+        return False
     
     def drive(self):
         print('Car is driving.')
+        self.motor.value(1)
 
     def stop_motors(self):
-        print('Stopping motors.')
+        self.motor.value(0)
 
 
 class EV(Car):
@@ -66,7 +85,7 @@ class EV(Car):
         super().__init__()
 
     def drive(self):
-        print('EV is driving.')
+        self.motor.value(1)
 
 class CO2(Car):
     def __init__(self):
