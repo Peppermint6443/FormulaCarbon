@@ -1,27 +1,16 @@
-from machine import Pin
 import time
+from car import Car, EV, CO2
 
-led = Pin(15, Pin.OUT)  # GPIO15 is the user LED on XIAO ESP32-C6
-led2 = Pin(20, Pin.OUT)  # GPIO20 is the user LED on XIAO ESP32-C6
+def main():
+    car = EV()
 
-while True:
-    led.on()
-    led2.off()
-    time.sleep(1)
-    led.off()
-    led2.on()
-    time.sleep(1)
+    try:
+        while True:
+            car.update()
+            time.sleep(0.05)
+    except KeyboardInterrupt:
+        car.stop_motors()
+        print("Shutting down.")
 
-
-# from machine import Pin
-# import time
-
-# led = Pin(20, Pin.OUT)
-
-# while True:
-#     led.value(1)
-#     print("LED ON")
-#     time.sleep(0.5)
-#     led.value(0)
-#     print("LED OFF")
-#     time.sleep(0.5)
+if __name__ == "__main__":
+    main()
